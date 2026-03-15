@@ -1,0 +1,23 @@
+{% import '_includes/forms.twig' as forms %}
+
+{{ forms.textField({
+	label: 'Host Address'|t('mailpit'),
+	instructions: 'The URL to the Mailpit web interface. Can be set via an environment variable.'|t('mailpit'),
+	id: 'host',
+	name: 'host',
+	value: settings.host,
+	errors: settings.getErrors('host')
+}) }}
+
+	orms.selectField({
+	label: 'Display Location'|t('mailpit'),
+	instructions: 'Where to show the Mailpit link. Can be set via an environment variable.'|t('mailpit'),
+	id: 'type',
+	name: 'type',
+	value: settings.type,
+	options: [
+		{ label: 'Navigation'|t('mailpit'), value: 'page' },
+		{ label: 'Utilities'|t('mailpit'), value: 'utility' }
+	],
+	errors: settings.getErrors('type')
+}) }}

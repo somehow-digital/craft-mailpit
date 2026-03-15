@@ -1,0 +1,56 @@
+{
+	"name": "somehow-digital/craft-mailpit",
+	"description": "Mailpit integration for Craft CMS.",
+	"type": "craft-plugin",
+	"keywords": ["craftcms", "plugin", "mailpit", "email", "development"],
+	"license": "MIT",
+	"homepage": "https://somehow.digital/",
+	"authors": [
+		{
+			"name": "Thomas Deinhamer",
+			"email": "code@thasmo.dev",
+			"homepage": "https://thasmo.com/"
+		}
+	],
+	"support": {
+		"email": "support@somehow.digital",
+		"docs": "https://github.com/somehow-digital/craft-mailpit",
+		"source": "https://github.com/somehow-digital/craft-mailpit",
+		"issues": "https://github.com/somehow-digital/craft-mailpit/issues"
+	},
+	"config": {
+		"optimize-autoloader": true,
+		"sort-packages": true,
+		"allow-plugins": {
+			"craftcms/plugin-installer": true,
+			"yiisoft/yii2-composer": true
+		}
+	},
+	"scripts": {
+		"analyze": "phpstan analyse",
+		"lint": "vendor/bin/ecs check --ansi",
+		"fix": "vendor/bin/ecs check --ansi --fix",
+		"post-install-cmd": [
+			"composer audit"
+		]
+	},
+	"require": {
+		"php": "^8.2.0",
+		"craftcms/cms": "^5.8.0"
+	},
+	"require-dev": {
+		"phpstan/phpstan": "^2.1.33",
+		"roave/security-advisories": "dev-latest",
+		"symplify/easy-coding-standard": "^13.0.4"
+	},
+	"autoload": {
+		"psr-4": {
+			"SomehowDigital\\Craft\\Mailpit\\": "src/"
+		}
+	},
+	"extra": {
+		"name": "Mailpit",
+		"handle": "mailpit",
+		"class": "SomehowDigital\\Craft\\Mailpit\\Mailpit"
+	}
+}
