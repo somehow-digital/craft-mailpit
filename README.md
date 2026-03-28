@@ -1,4 +1,4 @@
-<img src="./src/icon.svg" width="100" height="100" alt="Mailpit icon">
+<img src="src/icon.svg" width="96" height="96" alt="Mailpit icon" />
 
 # `Mailpit` for Craft CMS
 > Provides a [Mailpit](https://mailpit.axllent.org/) integration for [Craft CMS](https://craftcms.com/).
@@ -42,3 +42,7 @@ return [
   'type' => App::env('MAILPIT_TYPE'), // 'page' or 'utility'
 ];
 ```
+
+---
+
+> [somehow digital.](https://somehow.digital)
