@@ -2,8 +2,8 @@
 
 namespace SomehowDigital\Craft\Mailpit\services;
 
-use yii\base\Component;
 use GuzzleHttp\Client;
+use yii\base\Component;
 
 class MailpitService extends Component
 {
@@ -11,7 +11,6 @@ class MailpitService extends Component
 
 	public function getUnreadCount(): int
 	{
-
 		if (!$this->host) {
 			return 0;
 		}
