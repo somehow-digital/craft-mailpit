@@ -4,10 +4,10 @@ namespace SomehowDigital\Craft\Mailpit;
 
 use Craft;
 use craft\base\Plugin;
-use craft\events\RegisterUrlRulesEvent;
-use craft\web\UrlManager;
 use craft\events\RegisterComponentTypesEvent;
+use craft\events\RegisterUrlRulesEvent;
 use craft\services\Utilities;
+use craft\web\UrlManager;
 use SomehowDigital\Craft\Mailpit\models\Settings;
 use SomehowDigital\Craft\Mailpit\services\MailpitService;
 use SomehowDigital\Craft\Mailpit\utilities\MailpitUtility;
@@ -15,6 +15,8 @@ use yii\base\Event;
 
 /**
  * @property Settings $settings
+ * @property-read MailpitService $mailpit
+ * @method Settings getSettings()
  */
 class Mailpit extends Plugin
 {
@@ -40,7 +42,7 @@ class Mailpit extends Plugin
 			if ($settings->getType() === 'page') {
 				$this->hasCpSection = true;
 				$this->registerCpRoutes();
-			} else if ($this->getSettings()->getType() === 'utility') {
+			} elseif ($this->getSettings()->getType() === 'utility') {
 				$this->registerUtility();
 			}
 		}
