@@ -1,15 +1,24 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SomehowDigital\Craft\Mailpit\models;
 
 use craft\base\Model;
 use craft\helpers\App;
 
-class Settings extends Model
+/**
+ * @internal
+ */
+final class Settings extends Model
 {
 	public string $host = '';
+
 	public string $type = 'page';
 
+	/**
+	 * @return list<array<mixed>>
+	 */
 	public function rules(): array
 	{
 		return [
@@ -20,11 +29,11 @@ class Settings extends Model
 
 	public function getHost(): string
 	{
-		return App::parseEnv($this->host);
+		return (string) App::parseEnv($this->host);
 	}
 
 	public function getType(): string
 	{
-		return App::parseEnv($this->type);
+		return (string) App::parseEnv($this->type);
 	}
 }

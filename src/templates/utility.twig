@@ -1,1 +1,1 @@
-{% include 'mailpit/components/frame' with { source: settings.getHost() } only %}
+{{ include('mailpit/components/frame', {source: settings.getHost()}, false) }}

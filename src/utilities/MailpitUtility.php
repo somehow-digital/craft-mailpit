@@ -1,12 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SomehowDigital\Craft\Mailpit\utilities;
 
 use Craft;
 use craft\base\Utility;
-use SomehowDigital\Craft\Mailpit\Mailpit;
+use SomehowDigital\Craft\Mailpit\Plugin;
 
-class MailpitUtility extends Utility
+/**
+ * @internal
+ */
+final class MailpitUtility extends Utility
 {
 	public static function displayName(): string
 	{
@@ -18,23 +23,20 @@ class MailpitUtility extends Utility
 		return 'mailpit';
 	}
 
-	public static function icon(): ?string
+	public static function icon(): string
 	{
 		return Craft::getAlias('@mailpit/icon-mask.svg');
 	}
 
 	public static function badgeCount(): int
 	{
-		return Mailpit::getInstance()->mailpit->getUnreadCount();
+		return Plugin::instance()->mailpit->getUnreadCount();
 	}
 
 	public static function contentHtml(): string
 	{
-		$plugin = Mailpit::getInstance();
-		$settings = $plugin->getSettings();
-
 		return Craft::$app->getView()->renderTemplate('mailpit/utility', [
-			'settings' => $settings,
+			'settings' => Plugin::instance()->getSettings(),
 		]);
 	}
 

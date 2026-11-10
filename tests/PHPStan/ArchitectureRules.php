@@ -1,0 +1,136 @@
+<?php
+
+declare(strict_types=1);
+
+namespace SomehowDigital\Craft\Mailpit\Tests\PHPStan;
+
+use craft\base\Model;
+use craft\base\Plugin;
+use craft\base\Utility;
+use craft\web\Controller as WebController;
+use PHPat\Selector\Selector;
+use PHPat\Selector\SelectorInterface;
+use PHPat\Test\Attributes\TestRule;
+use PHPat\Test\Builder\Rule;
+use PHPat\Test\PHPat;
+use yii\base\Component;
+
+/**
+ * What the classes of each layer extend and how they are named. Dependencies between layers are in deptrac.yaml.
+ */
+final class ArchitectureRules
+{
+	private const PLUGIN = 'SomehowDigital\Craft\Mailpit';
+
+	private const TESTS = self::PLUGIN . '\Tests';
+
+	/**
+	 * Layer namespaces with their base class and name suffix.
+	 *
+	 * @var array<non-empty-string,array{base:?class-string,suffix:?non-empty-string}>
+	 */
+	private const LAYERS = [
+		'controllers' => ['base' => WebController::class, 'suffix' => 'Controller'],
+		'models' => ['base' => Model::class, 'suffix' => null],
+		'services' => ['base' => Component::class, 'suffix' => 'Service'],
+		'utilities' => ['base' => Utility::class, 'suffix' => 'Utility'],
+	];
+
+	/** Created by Yii from config, so the plugin registers rather than constructs them. */
+	private const COMPONENTS = ['controllers', 'services', 'utilities'];
+
+	/**
+	 * Layer classes extend their Craft or Yii base class and carry its suffix.
+	 *
+	 * @return iterable<string,Rule>
+	 */
+	#[TestRule]
+	public function layerClassesExtendTheirBaseAndCarryItsName(): iterable
+	{
+		foreach (self::LAYERS as $namespace => ['base' => $base, 'suffix' => $suffix]) {
+			yield " ({$namespace} extend)" => PHPat::rule()
+				->classes($this->layer($namespace))
+				->should()->extend()
+				->classes(Selector::classname($base))
+				->because("The classes of {$namespace} are {$base} classes, which Craft and Yii know how to create and run.");
+
+			if ($suffix !== null) {
+				yield " ({$namespace} named)" => PHPat::rule()
+					->classes($this->layer($namespace))
+					->should()->beNamed('/' . $suffix . '$/', true)
+					->because("The name of a class of {$namespace} ends with {$suffix}, so it tells what it is wherever it is used.");
+			}
+		}
+	}
+
+	#[TestRule]
+	public function theRootHoldsOnlyThePlugin(): Rule
+	{
+		return PHPat::rule()
+			->classes($this->root())
+			->excluding(Selector::classname(self::PLUGIN . '\Plugin'))
+			->shouldNot()->exist()
+			->because('Projects and Craft reference the plugin by its name, so only it is at the root, where it never moves.');
+	}
+
+	#[TestRule]
+	public function thePluginIsACraftPlugin(): Rule
+	{
+		return PHPat::rule()
+			->classes(Selector::classname(self::PLUGIN . '\Plugin'))
+			->should()->extend()
+			->classes(Selector::classname(Plugin::class))
+			->because('The plugin is the class that Craft loads the plugin through.');
+	}
+
+	#[TestRule]
+	public function everyClassLivesInTheNamespaceOfALayer(): Rule
+	{
+		return PHPat::rule()
+			->classes($this->plugin())
+			->excluding($this->root(), ...array_map($this->layer(...), array_keys(self::LAYERS)))
+			->shouldNot()->exist()
+			->because('A class belongs to a layer, whose namespace deptrac.yaml defines the dependencies of.');
+	}
+
+	#[TestRule]
+	public function concreteClassesAreFinal(): Rule
+	{
+		return PHPat::rule()
+			->classes($this->plugin())
+			->excluding(Selector::isAbstract(), Selector::isInterface(), Selector::isTrait(), Selector::isEnum())
+			->should()->beFinal()
+			->because('Classes are composed rather than extended, so a change to one cannot break a class extending it.');
+	}
+
+	#[TestRule]
+	public function componentsAreNotConstructed(): Rule
+	{
+		return PHPat::rule()
+			->classes(Selector::all())
+			->shouldNot()->construct()
+			->classes(...array_map($this->layer(...), self::COMPONENTS))
+			->because('Yii creates the components from their config, so they can be configured and replaced, rather than constructed by whoever uses them.');
+	}
+
+	private function plugin(): SelectorInterface
+	{
+		return Selector::AllOf(Selector::inNamespace(self::PLUGIN), Selector::Not(Selector::inNamespace(self::TESTS)));
+	}
+
+	/**
+	 * Classes outside any sub-namespace.
+	 */
+	private function root(): SelectorInterface
+	{
+		return Selector::inNamespace('/^' . preg_quote(self::PLUGIN, '/') . '$/', true);
+	}
+
+	/**
+	 * @param non-empty-string $namespace
+	 */
+	private function layer(string $namespace): SelectorInterface
+	{
+		return Selector::inNamespace(self::PLUGIN . '\\' . $namespace);
+	}
+}
