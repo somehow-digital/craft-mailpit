@@ -24,9 +24,9 @@ it('rejects unknown types', function (): void {
 
 it('takes the host and type from the control panel', function (): void {
 	$settings = new Settings();
-	$settings->setAttributes(['host' => 'https://mailpit.example.test', 'type' => 'utility']);
+	$settings->setAttributes(['host' => TEST_HOST, 'type' => 'utility']);
 
-	expect($settings->host)->toBe('https://mailpit.example.test');
+	expect($settings->host)->toBe(TEST_HOST);
 	expect($settings->type)->toBe('utility');
 });
 
@@ -39,12 +39,12 @@ it('resolves unset environment variables to nothing', function (): void {
 
 it('resolves environment variables', function (): void {
 	$this->env([
-		'MAILPIT_HOST' => 'https://mailpit.example.test',
+		'MAILPIT_HOST' => TEST_HOST,
 		'MAILPIT_TYPE' => 'utility',
 	]);
 
 	$settings = new Settings(['host' => '$MAILPIT_HOST', 'type' => '$MAILPIT_TYPE']);
 
-	expect($settings->getHost())->toBe('https://mailpit.example.test');
+	expect($settings->getHost())->toBe(TEST_HOST);
 	expect($settings->getType())->toBe('utility');
 });

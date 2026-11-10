@@ -38,14 +38,12 @@ final readonly class PublicApiRule implements Rule
 		$class = $node->getClassReflection();
 		$name = $class->getName();
 
-		if ($class->isAnonymous() || !str_starts_with($name, $this->namespace . '\\')) {
-			return [];
-		}
+		$outside = $class->isAnonymous()
+			|| !str_starts_with($name, $this->namespace . '\\')
+			|| array_any($this->excluded, static fn(string $excluded): bool => str_starts_with($name, $excluded . '\\'));
 
-		foreach ($this->excluded as $excluded) {
-			if (str_starts_with($name, $excluded . '\\')) {
-				return [];
-			}
+		if ($outside) {
+			return [];
 		}
 
 		$internal = str_contains((string) $class->getNativeReflection()->getDocComment(), '@internal');

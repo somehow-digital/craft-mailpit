@@ -52,10 +52,10 @@ it('has settings', function (): void {
 });
 
 it('passes the host to the service', function (): void {
-	$this->createApp(['host' => 'https://mailpit.example.test']);
+	$this->createApp(['host' => TEST_HOST]);
 
 	expect(Plugin::instance()->mailpit)->toBeInstanceOf(MailpitService::class);
-	expect(Plugin::instance()->mailpit->host)->toBe('https://mailpit.example.test');
+	expect(Plugin::instance()->mailpit->host)->toBe(TEST_HOST);
 });
 
 it('leaves out the service outside of the control panel', function (): void {
@@ -111,11 +111,11 @@ it('throws when the plugin is not loaded', function (): void {
 })->throws(InvalidConfigException::class, 'The Mailpit plugin is not loaded.');
 
 it('renders the settings with the current ones', function (): void {
-	$this->createApp(['host' => 'https://mailpit.example.test']);
+	$this->createApp(['host' => TEST_HOST]);
 
 	$html = (new ReflectionMethod(Plugin::class, 'settingsHtml'))->invoke(Plugin::instance());
 
-	expect($html)->toContain('https://mailpit.example.test');
+	expect($html)->toContain(TEST_HOST);
 });
 
 it('is initialized as a plugin', function (): void {

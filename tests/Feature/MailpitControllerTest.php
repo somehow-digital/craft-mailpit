@@ -9,7 +9,7 @@ use SomehowDigital\Craft\Mailpit\models\Settings;
 use yii\web\ForbiddenHttpException;
 
 it('renders the page with the settings', function (): void {
-	$this->createApp(['host' => 'https://mailpit.example.test']);
+	$this->createApp(['host' => TEST_HOST]);
 	Craft::$app->getUser()->setIdentity(new User(['admin' => true]));
 
 	$response = assertInstance(Craft::$app->runAction('mailpit/mailpit/index'), Response::class);
@@ -17,12 +17,12 @@ it('renders the page with the settings', function (): void {
 	$settings = assertInstance($template->variables['settings'] ?? null, Settings::class);
 
 	expect($template->template)->toBe('mailpit/page');
-	expect($settings->host)->toBe('https://mailpit.example.test');
+	expect($settings->host)->toBe(TEST_HOST);
 });
 
 // Action requests from the site aren't checked by Craft, so the action checks the permission itself.
 it('requires access to the control panel', function (): void {
-	$this->createApp(['host' => 'https://mailpit.example.test'], isCpRequest: false);
+	$this->createApp(['host' => TEST_HOST], isCpRequest: false);
 	Craft::$app->getConfig()->getGeneral()->isSystemLive = true;
 	Craft::$app->getUser()->setIdentity(new class (['admin' => false]) extends User {
 		public function can(string $permission): bool

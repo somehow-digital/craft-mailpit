@@ -13,14 +13,14 @@ it('describes the utility', function (): void {
 });
 
 it('shows the unread messages as the badge', function (): void {
-	$this->createApp(['host' => 'https://mailpit.example.test', 'type' => 'utility']);
+	$this->createApp(['host' => TEST_HOST, 'type' => 'utility']);
 	$this->http(new Response(200, [], '{"Unread": 3}'));
 
 	expect(MailpitUtility::badgeCount())->toBe(3);
 });
 
 it('embeds the host', function (): void {
-	$this->createApp(['host' => 'https://mailpit.example.test', 'type' => 'utility']);
+	$this->createApp(['host' => TEST_HOST, 'type' => 'utility']);
 
-	expect(MailpitUtility::contentHtml())->toContain('https://mailpit.example.test');
+	expect(MailpitUtility::contentHtml())->toContain(TEST_HOST);
 });
