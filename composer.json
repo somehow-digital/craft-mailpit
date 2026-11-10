@@ -22,7 +22,7 @@
 		"email": "support@somehow.digital",
 		"issues": "https://github.com/somehow-digital/craft-mailpit/issues",
 		"source": "https://github.com/somehow-digital/craft-mailpit",
-		"docs": "https://github.com/somehow-digital/craft-mailpit"
+		"docs": "https://craft-mailpit.somehow-digital.dev"
 	},
 	"require": {
 		"php": "^8.2.0",
