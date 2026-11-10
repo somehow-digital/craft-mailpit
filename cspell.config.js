@@ -4,11 +4,11 @@ export default {
 		{
 			addWords: true,
 			name: 'project',
-			path: './dictionary.txt',
+			path: './docs/dictionary.txt',
 		},
 	],
-	ignorePaths: ['.astro/', '.void/', 'dist/'],
 	import: ['@somehow-digital/cspell-dictionary'],
+	ignorePaths: ['docs/.astro/', 'docs/.void/', 'docs/dist/'],
 	language: 'en',
 	version: '0.2',
 };
