@@ -8,6 +8,7 @@ export default {
 		},
 	],
 	import: ['@somehow-digital/cspell-dictionary'],
+	ignorePaths: ['docs/.astro/', 'docs/.void/', 'docs/dist/'],
 	language: 'en',
 	version: '0.2',
 };
