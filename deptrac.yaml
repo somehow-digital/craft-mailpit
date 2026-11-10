@@ -1,0 +1,62 @@
+# The plugin's layers and which of them each may depend on.
+#
+# A layer is a plugin namespace (as Craft's generator lays them out). Unlisted framework and package code is open to
+# every layer. `deptrac debug:unassigned` fails for plugin classes outside any layer. Class rules (base classes,
+# naming) live in tests/PHPStan/ArchitectureRules.php.
+#
+# Dependencies point inwards and never back, except entry points reaching services through the plugin, as Craft does
+# with `Plugin::getInstance()`. Deptrac can't see service locator calls such as `Craft::$app->getRequest()`.
+#
+#   Plugin           the composition root, registering components and event handlers
+#   Entry points
+#     Http           web controllers                                  controllers
+#     View           utilities                                        utilities
+#   Application
+#     Services       components that hold the logic                   services
+#   Domain
+#     Models         settings                                         models
+
+parameters:
+  plugin: 'SomehowDigital\\Craft\\Mailpit'
+
+deptrac:
+  paths:
+    - ./src
+
+  analyser:
+    types:
+      - class
+      - class_superglobal
+      - function
+      - function_call
+      - function_superglobal
+      - use
+
+  layers:
+    - name: Plugin
+      collectors:
+        - type: classNameRegex
+          value: '#^%plugin%\\Plugin$#'
+    - name: Http
+      collectors:
+        - type: classNameRegex
+          value: '#^%plugin%\\controllers\\#'
+    - name: View
+      collectors:
+        - type: classNameRegex
+          value: '#^%plugin%\\utilities\\#'
+    - name: Services
+      collectors:
+        - type: classNameRegex
+          value: '#^%plugin%\\services\\#'
+    - name: Models
+      collectors:
+        - type: classNameRegex
+          value: '#^%plugin%\\models\\#'
+
+  ruleset:
+    Plugin: [Http, View, Services, Models]
+    Http: [Plugin, Models]
+    View: [Plugin, Services, Models]
+    Services: ~
+    Models: ~

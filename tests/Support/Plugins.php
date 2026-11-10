@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SomehowDigital\Craft\Mailpit\Tests\Support;
 
 use craft\base\PluginInterface;

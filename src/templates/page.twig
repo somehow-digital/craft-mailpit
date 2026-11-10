@@ -5,9 +5,9 @@
 {% set pluginCpSection = settings.getType() == 'page' %}
 
 {% set crumbs = [
-	{ label: 'Mailpit'|t('mailpit'), url: url('mailpit') },
+	{label: 'Mailpit'|t('mailpit'), url: url('mailpit')},
 ] %}
 
 {% block content %}
-	{% include 'mailpit/components/frame' with { source: settings.getHost() } only %}
+	{{ include('mailpit/components/frame', {source: settings.getHost()}, false) }}
 {% endblock %}

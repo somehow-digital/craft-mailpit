@@ -1,13 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SomehowDigital\Craft\Mailpit\Tests;
 
+use ArrayObject;
+use Closure;
 use Craft;
 use craft\helpers\ArrayHelper;
 use craft\services\Config;
 use craft\web\Application;
+use GuzzleHttp\Client;
+use GuzzleHttp\ClientInterface;
 use PHPUnit\Framework\TestCase as BaseTestCase;
-use SomehowDigital\Craft\Mailpit\Mailpit;
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
+use SomehowDigital\Craft\Mailpit\Plugin;
 use SomehowDigital\Craft\Mailpit\Tests\Support\Plugins;
 use yii\base\Event;
 use yii\caching\ArrayCache;
@@ -25,6 +33,17 @@ abstract class TestCase extends BaseTestCase
 	{
 		parent::setUp();
 
+		$previous = set_error_handler(null);
+		restore_error_handler();
+		set_error_handler(static function (int $level, string $message, string $file = '', int $line = 0) use ($previous): bool {
+			// Craft's Twig nodes aren't `yield`-ready; not ours to fix.
+			if ($level === E_USER_DEPRECATED && str_contains($message, 'YieldReady') && str_contains($message, 'craft\\web\\twig\\nodes\\')) {
+				return true;
+			}
+
+			return $previous !== null && (bool) $previous($level, $message, $file, $line);
+		}, E_USER_DEPRECATED);
+
 		$this->createApp();
 	}
 
@@ -34,7 +53,10 @@ abstract class TestCase extends BaseTestCase
 			unset($_SERVER[$name]);
 		}
 
+		restore_error_handler();
+
 		Event::offAll();
+		// @phpstan-ignore assign.propertyType (Yii types the app as always set)
 		Craft::$app = null;
 		Craft::$container = new Container();
 
@@ -57,12 +79,12 @@ abstract class TestCase extends BaseTestCase
 		$configService->appType = 'web';
 		$configService->env = 'test';
 		$configService->configDir = Craft::getAlias('@config');
-		$configService->appDefaultsDir = "$src/config/defaults";
+		$configService->appDefaultsDir = "{$src}/config/defaults";
 
 		$config = ArrayHelper::merge(
 			['vendorPath' => CRAFT_VENDOR_PATH, 'env' => 'test', 'components' => ['config' => $configService]],
-			require "$src/config/app.php",
-			require "$src/config/app.web.php",
+			require "{$src}/config/app.php",
+			require "{$src}/config/app.web.php",
 			[
 				'isInstalled' => false,
 				'components' => [
@@ -74,6 +96,7 @@ abstract class TestCase extends BaseTestCase
 		);
 
 		/** @var Application $app */
+		// @phpstan-ignore argument.type, argument.templateType (Craft's stub only knows the `class` key)
 		$app = Craft::createObject($config);
 
 		// Tests run on the command line, which requests take for console requests.
@@ -88,16 +111,17 @@ abstract class TestCase extends BaseTestCase
 	/**
 	 * @param array<string,mixed> $settings
 	 */
-	protected function createPlugin(array $settings = []): Mailpit
+	protected function createPlugin(array $settings = []): Plugin
 	{
-		/** @var Mailpit $plugin */
+		/** @var Plugin $plugin */
+		// @phpstan-ignore argument.type (Craft's stub only knows the `class` key)
 		$plugin = Craft::createObject([
-			'class' => Mailpit::class,
+			'class' => Plugin::class,
 			'basePath' => dirname(__DIR__) . '/src',
 			'settings' => $settings,
 		], ['mailpit', Craft::$app]);
 
-		Mailpit::setInstance($plugin);
+		Plugin::setInstance($plugin);
 		Craft::$app->setModule('mailpit', $plugin);
 
 		/** @var Plugins $plugins */
@@ -105,6 +129,30 @@ abstract class TestCase extends BaseTestCase
 		$plugins->install($plugin);
 
 		return $plugin;
+	}
+
+	/**
+	 * Mocks the responses of the HTTP client with a response or a callback taking the request.
+	 *
+	 * The callback may throw, e.g. a `ConnectException` to simulate an outage.
+	 *
+	 * @param ResponseInterface|Closure(RequestInterface):ResponseInterface $responses
+	 * @return ArrayObject<int,RequestInterface> The requests that are sent.
+	 */
+	protected function http(ResponseInterface|Closure $responses): ArrayObject
+	{
+		/** @var ArrayObject<int,RequestInterface> $requests */
+		$requests = new ArrayObject();
+
+		Craft::$container->set(ClientInterface::class, new Client([
+			'handler' => static function (RequestInterface $request) use ($responses, $requests): ResponseInterface {
+				$requests[] = $request;
+
+				return $responses instanceof ResponseInterface ? $responses : $responses($request);
+			},
+		]));
+
+		return $requests;
 	}
 
 	/**

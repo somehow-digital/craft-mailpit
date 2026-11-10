@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SomehowDigital\Craft\Mailpit;
 
 use Craft;
-use craft\base\Plugin;
+use craft\base\Plugin as PluginBase;
 use craft\events\RegisterComponentTypesEvent;
 use craft\events\RegisterUrlRulesEvent;
 use craft\services\Utilities;
@@ -12,16 +14,26 @@ use SomehowDigital\Craft\Mailpit\models\Settings;
 use SomehowDigital\Craft\Mailpit\services\MailpitService;
 use SomehowDigital\Craft\Mailpit\utilities\MailpitUtility;
 use yii\base\Event;
+use yii\base\InvalidConfigException;
 
 /**
  * @property Settings $settings
- * @property-read MailpitService $mailpit
+ * @property MailpitService $mailpit
  * @method Settings getSettings()
  */
-class Mailpit extends Plugin
+final class Plugin extends PluginBase
 {
 	public bool $hasCpSettings = true;
+
 	public bool $hasCpSection = false;
+
+	/**
+	 * @throws InvalidConfigException when the plugin is not loaded.
+	 */
+	public static function instance(): self
+	{
+		return self::getInstance() ?? throw new InvalidConfigException('The Mailpit plugin is not loaded.');
+	}
 
 	public function init(): void
 	{
@@ -42,16 +54,18 @@ class Mailpit extends Plugin
 			if ($settings->getType() === 'page') {
 				$this->hasCpSection = true;
 				$this->registerCpRoutes();
-			} elseif ($this->getSettings()->getType() === 'utility') {
+			} elseif ($settings->getType() === 'utility') {
 				$this->registerUtility();
 			}
 		}
 	}
 
-	public function getCpNavItem(): ?array
+	/**
+	 * @return array<string,mixed>
+	 */
+	public function getCpNavItem(): array
 	{
-		return array_merge(parent::getCpNavItem(), [
-			'url' => 'mailpit',
+		return array_merge(parent::getCpNavItem() ?? [], [
 			'badgeCount' => $this->mailpit->getUnreadCount(),
 		]);
 	}
@@ -61,7 +75,7 @@ class Mailpit extends Plugin
 		return new Settings();
 	}
 
-	protected function settingsHtml(): ?string
+	protected function settingsHtml(): string
 	{
 		return Craft::$app->getView()->renderTemplate(
 			'mailpit/settings',

@@ -6,7 +6,7 @@
 	id: 'host',
 	name: 'host',
 	value: settings.host,
-	errors: settings.getErrors('host')
+	errors: settings.getErrors('host'),
 }) }}
 
 {{ forms.selectField({
@@ -16,8 +16,8 @@
 	name: 'type',
 	value: settings.type,
 	options: [
-		{ label: 'Navigation'|t('mailpit'), value: 'page' },
-		{ label: 'Utilities'|t('mailpit'), value: 'utility' }
+		{label: 'Navigation'|t('mailpit'), value: 'page'},
+		{label: 'Utilities'|t('mailpit'), value: 'utility'},
 	],
-	errors: settings.getErrors('type')
+	errors: settings.getErrors('type'),
 }) }}
