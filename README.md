@@ -43,6 +43,10 @@ return [
 ];
 ```
 
+## Documentation
+
+Read the [documentation](https://craft-mailpit.somehow-digital.dev).
+
 ---
 
 > [somehow digital.](https://somehow.digital)
