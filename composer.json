@@ -27,7 +27,7 @@
 	"require": {
 		"php": "^8.2.0",
 		"craftcms/cms": "^5.8.0",
-		"guzzlehttp/guzzle": "^7.2"
+		"guzzlehttp/guzzle": "^8.0"
 	},
 	"require-dev": {
 		"craftcms/phpstan": "dev-main",
